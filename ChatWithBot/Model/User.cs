@@ -36,6 +36,15 @@ namespace ChatWithBot.Model
              }
             
         }
+        public static void CreatUser(List<User> user)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            using (FileStream fs = new FileStream("Users.dat", FileMode.OpenOrCreate))
+            {
+                formatter.Serialize(fs, user);
+            }
+
+        }
 
         public void DeleteChat()
         {

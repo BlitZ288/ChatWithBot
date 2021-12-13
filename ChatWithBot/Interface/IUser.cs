@@ -10,7 +10,6 @@ namespace ChatWithBot.Model
     {
         public void CreatChat(List<Chat> chats);
         public void DeleteMessage();
-        public void SendMessage();
         public void ReadMessage();
         public void DeleteChat();
         public void ExitChat();

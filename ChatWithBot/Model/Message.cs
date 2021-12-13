@@ -12,6 +12,6 @@ namespace ChatWithBot.Model
        public int IdMessage { get; set; }
         public string Content { get; set; }
         public DateTime dateTime { get; set; }
-        public User user { get; set; }
+        public User user = new User();
     }
 }
