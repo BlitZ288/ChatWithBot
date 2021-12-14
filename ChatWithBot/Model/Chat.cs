@@ -14,30 +14,14 @@ namespace ChatWithBot.Model
     {
         public string Name { get; set; }
 
-        public List<User> Users = new List<User>();
+        public List<User> Users;
       
         public List<Message> ListMessage = new List<Message>();
+        public Dictionary<string, LogsUser> ChatLogUsers = new Dictionary<string, LogsUser>();
 
         public Bot ChatBot { get; set; }
 
         public static List<Chat> Chats = new List<Chat>();
-        public static List<Chat> GetAllChats()
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            using (FileStream fs = new FileStream("Chat.dat", FileMode.OpenOrCreate))
-            {
-                try
-                {
-                    List<Chat> deserilizeChat = (List<Chat>)formatter.Deserialize(fs);
-                    return deserilizeChat;
-                }
-                catch
-                {
-                    Console.WriteLine("Чаты отсутсвуют");
-                }
-               
-            }
-            return null;
-        }
+       
     }
 }

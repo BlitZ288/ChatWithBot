@@ -12,6 +12,7 @@ namespace ChatWithBot.Model
     public class User:IUser
     {
         public string Name { get; set; }
+       /// public string ListMessage { get; set; }
         public void CreatChat(List<Chat> chat)
         {
             BinaryFormatter formatter = new BinaryFormatter();
@@ -35,17 +36,7 @@ namespace ChatWithBot.Model
                  return deserilizeUser;
              }
             
-        }
-        public static void CreatUser(List<User> user)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            using (FileStream fs = new FileStream("Users.dat", FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(fs, user);
-            }
-
-        }
-
+        }       
         public void DeleteChat()
         {
             throw new NotImplementedException();
