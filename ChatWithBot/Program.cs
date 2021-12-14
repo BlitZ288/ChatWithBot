@@ -163,7 +163,7 @@ namespace ChatWithBot
                         break;
                     case "del-mes":
                         Message ChoiceMessage = chat.ListMessage[Convert.ToInt32(choice[1])-1];
-                        if (ChoiceMessage.user == user && DateTime.Now.Subtract(ChoiceMessage.dateTime)< new TimeSpan(60,0,0))
+                        if (ChoiceMessage.user.Name == user.Name && DateTime.Now.Subtract(ChoiceMessage.dateTime)< new TimeSpan(60,0,0))
                         {
                             chat.ListMessage.Remove(ChoiceMessage);
                             Console.WriteLine("Сообщение успешно удаленно ");
