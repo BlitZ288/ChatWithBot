@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatWithBot.Interface;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace ChatWithBot.Model
 {
     [Serializable]
 
-    public class Chat
+    class Chat
     {
         public string Name { get; set; }
 
@@ -19,7 +20,9 @@ namespace ChatWithBot.Model
         public List<Message> ListMessage = new List<Message>();
         public Dictionary<string, LogsUser> ChatLogUsers = new Dictionary<string, LogsUser>();
 
-        public Bot ChatBot { get; set; }
+        public List<IBot> ChatBot = new List<IBot>();
+
+        public List<LogAction> LogActions = new List<LogAction>();
 
         public static List<Chat> Chats = new List<Chat>();
        

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace ChatWithBot.Model
 {
     [Serializable]
-    public class Message
+     class Message
     {
         public int IdMessage { get; set; }
         public string Content { get; set; }
         public DateTime dateTime { get; set; }
-        public User OutUser { get; set; }
+        public string OutUser { get; set; }
 
         public User user;
     }

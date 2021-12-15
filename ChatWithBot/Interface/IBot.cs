@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace ChatWithBot.Interface
 {
-    class IBot
+    interface IBot
     {
-        public virtual string NameBot { get; set; }
+        public  string NameBot { get; set; }
+        public string Move(string command);
     }
 }

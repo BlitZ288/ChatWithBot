@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ChatWithBot.Model
 {
     [Serializable]
-    public class LogsUser
+     class LogsUser
     {
        public DateTime StartChat { get; set; }
        public DateTime? StopChat { get; set; }
