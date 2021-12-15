@@ -9,6 +9,11 @@ namespace ChatWithBot.Interface
     interface IBot
     {
         public  string NameBot { get; set; }
+        /// <summary>
+        /// Действие бота
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public string Move(string command);
     }
 }

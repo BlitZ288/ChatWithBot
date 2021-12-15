@@ -15,9 +15,10 @@ namespace ChatWithBot.Model
     {
         public string Name { get; set; }
 
-        public List<User> Users;
+        public List<User> Users = new List<User>();
       
         public List<Message> ListMessage = new List<Message>();
+
         public Dictionary<string, LogsUser> ChatLogUsers = new Dictionary<string, LogsUser>();
 
         public List<IBot> ChatBot = new List<IBot>();

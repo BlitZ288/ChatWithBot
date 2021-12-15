@@ -1,25 +1,21 @@
 ﻿using ChatWithBot.Interface;
 using ChatWithBot.Model;
 using ChatWithBot.Model.Bots;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ChatWithBot
 {
     class BinaryHelper
     {
-
         public static void CreatChat(List<Chat> chat)
         {
-
             BinaryFormatter formatter = new BinaryFormatter();
-            // получаем поток, куда будем записывать сериализованный объект
+            
             using (FileStream fs = new FileStream("Chat.dat", FileMode.OpenOrCreate))
             {
                 formatter.Serialize(fs, chat);
@@ -27,7 +23,6 @@ namespace ChatWithBot
         }
         public static List<Chat> GetAllChats()
         {
-            //var fa = System.Reflection.Assembly.GetEntryAssembly().Location;
             List<Chat> deserilizeChat = new List<Chat>();
             BinaryFormatter formatter = new BinaryFormatter();
             using (FileStream fs = new FileStream("Chat.dat", FileMode.OpenOrCreate))

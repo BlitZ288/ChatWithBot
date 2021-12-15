@@ -1,4 +1,5 @@
-﻿using ChatWithBot.Model;
+﻿using ChatWithBot.Interface;
+using ChatWithBot.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,6 @@ namespace ChatWithBot
 {
     class Program
     {
-
-        
         static void Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать");
@@ -19,7 +18,6 @@ namespace ChatWithBot
             if (ListUser.Any() && ListUser.Where(u=>u.Name==UserName).Any())
             {
                 user = ListUser.Where(u => u.Name == UserName).FirstOrDefault();
-               
             }
             else
             {
@@ -28,61 +26,58 @@ namespace ChatWithBot
                 BinaryHelper.CreatUser(ListUser);
             }
             Console.WriteLine(" create-chat\n start-chat \n");
-            string choice = Console.ReadLine().Trim();
-            switch (choice)
+            while (true)
             {
-                case "create-chat":
-                    Chat chat = new Chat();
-                    Console.WriteLine("Название чата:");
-                    chat.Name = Console.ReadLine().Trim();
-                    Console.WriteLine("Доступны боты:");
-                    int i = 1;
-                    var ListBots = BinaryHelper.GetAllBot();
-                    foreach (var b in ListBots)
-                    {
-                        Console.WriteLine($"{i} {b.NameBot}");
-                        i++;
-                    }                   
-                    List<User> users = new List<User>();
-                    users.Add(user);
-                    chat.Users=users;
-                    chat.ChatLogUsers.Add(user.Name, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
-                    chat.ChatBot.Add(ListBots[Convert.ToInt32(Console.ReadLine().Trim()) - 1]);
-                    chat.LogActions.Add(new LogAction(DateTime.Now, choice,user.Name));
-                    Chat.Chats = BinaryHelper.GetAllChats();
-                    Chat.Chats.Add(chat);                    
-                    BinaryHelper.CreatChat(Chat.Chats);
-                    Console.WriteLine("Чат успешно создан");
-                    break;
-                case "start-chat":
-                    Chat.Chats = BinaryHelper.GetAllChats();
-                   
-
-                    if (Chat.Chats == null || !Chat.Chats.Any())
-                    {
-                        Console.WriteLine("Доступных чатов нет");
-                        break;
-                    }
-                    int j = 1;
-                    Console.WriteLine("Доступные чаты:");
-                    foreach (var c in Chat.Chats)
-                    {
-                        Console.Write($"\t {j} {c.Name}");
-                        foreach(var b in c.ChatBot)
+                string choice = Console.ReadLine().Trim();
+                switch (choice)
+                {
+                    case "create-chat":
+                        Chat chat = new Chat();
+                        Console.WriteLine("Название чата:");
+                        chat.Name = Console.ReadLine().Trim();
+                        Console.WriteLine("Доступны боты:");
+                        int i = 1;
+                        var ListBots = BinaryHelper.GetAllBot();
+                        foreach (var b in ListBots)
                         {
-                            Console.Write($"\t  Боты: {b.NameBot} \n");
+                            Console.WriteLine($"{i} {b.NameBot}");
+                            i++;
+                        } 
+                        chat.Users.Add(user);
+                        chat.ChatLogUsers.Add(user.Name, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
+                        chat.ChatBot.Add(ListBots[Convert.ToInt32(Console.ReadLine().Trim()) - 1]);
+                        chat.LogActions.Add(new LogAction(DateTime.Now, choice,user.Name));
+                        Chat.Chats = BinaryHelper.GetAllChats();
+                        Chat.Chats.Add(chat);                    
+                        BinaryHelper.CreatChat(Chat.Chats);
+                        Console.WriteLine("Чат успешно создан");
+                        break;
+                    case "start-chat":
+                        Chat.Chats = BinaryHelper.GetAllChats(); 
+                        if (Chat.Chats == null || !Chat.Chats.Any())
+                        {
+                            Console.WriteLine("Доступных чатов нет");
+                            break;
                         }
-                        j++;
-                    }
-                    Console.WriteLine("В какой хотете войти:");
-                    int chociChat = Convert.ToInt32(Console.ReadLine().Trim())-1;
-                    Chat.Chats[chociChat].LogActions.Add(new LogAction(DateTime.Now, choice, user.Name));
-                    //Chat.Chats[chociChat].Users.Add(user);
-                    DialogChat(user, Chat.Chats[chociChat]);
-                    break;                   
+                        int j = 1;
+                        Console.WriteLine("Доступные чаты:");
+                        foreach (var c in Chat.Chats)
+                        {
+                            Console.Write($"\t {j} {c.Name}");
+                            Console.Write("\t Боты:");
+                            foreach (var b in c.ChatBot)
+                            {
+                                Console.Write($"\t {b.NameBot} \n");
+                            }
+                            j++;
+                        }
+                        Console.WriteLine("В какой хотете войти:");
+                        int chociChat = Convert.ToInt32(Console.ReadLine().Trim())-1;
+                        Chat.Chats[chociChat].LogActions.Add(new LogAction(DateTime.Now, choice, user.Name));                       
+                        DialogChat(user, Chat.Chats[chociChat]);
+                        break;                   
+                }
             }
-            Console.ReadKey();
-            
             
         }
         static void DialogChat( User user,Chat chat)
@@ -98,7 +93,7 @@ namespace ChatWithBot
             DialogHistoryChat(user, chat, ref flagNewChat); 
             Console.WriteLine("Доступные команды ");
             Console.WriteLine(" sign @username \n logut @username\n add-mes @username ``message``\n" +
-              " del-mes messageId \n bot @botname @username /bot-command\n stop-сhat \n 0-Сохранить и выйти");
+              " del-mes messageId \n bot @botname @username /bot-command\n stop-сhat \n signb @botname\n 0-Сохранить и выйти");
             bool flagStop = true;
             while (flagStop)
             {
@@ -109,7 +104,7 @@ namespace ChatWithBot
                         chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
                         string NameInvite = choice[1].Replace("@", "");
                         var Inviteuser = BinaryHelper.GetUsers().Where(u => u.Name == choice[1]).FirstOrDefault();
-                        if (!chat.Users.Contains(Inviteuser))
+                        if (!chat.Users.Where(u=>u.Name==Inviteuser.Name).Any())
                         {
                             if (!chat.ChatLogUsers.ContainsKey(NameInvite))
                             {
@@ -128,18 +123,26 @@ namespace ChatWithBot
                         }
                         break;
                     case "logut":
-                        chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
-                        NameInvite = choice[1].Replace("@", "");
-                        var CickUer = chat.Users.Where(u => u.Name == NameInvite).FirstOrDefault();
-                        if (CickUer != null)
+                        if (chat.Users.Where(u => u.Name == user.Name).Any())
                         {
-                            chat.ChatLogUsers[CickUer.Name].StopChat = DateTime.Now;
-                            chat.Users.Remove(CickUer);
-                            Console.WriteLine($"Пользователь {choice[1].Replace("@", "")} удален из чата");
+                            chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
+                            NameInvite = choice[1].Replace("@", "");
+                            var CickUer = chat.Users.Where(u => u.Name == NameInvite).FirstOrDefault();
+                            if (CickUer != null)
+                            {
+                                chat.ChatLogUsers[CickUer.Name].StopChat = DateTime.Now;
+                                chat.Users.Remove(CickUer);
+                                Console.WriteLine($"Пользователь {choice[1].Replace("@", "")} удален из чата");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Пользователя с таким именем нет");
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("Пользователя с таким именем нет");
+                            Console.WriteLine("Вы не являись участником");
+                            Console.WriteLine("Чтобы присоединиться используйте команду sign @username");
                         }
                         break;
                     case "add-mes":
@@ -177,7 +180,6 @@ namespace ChatWithBot
                         {
                             Console.WriteLine("Вы не можете писать в чать не являись участником");
                             Console.WriteLine("Чтобы присоединиться используйте команду sign @username");
-
                         }
                         break;
                     case "del-mes":
@@ -214,8 +216,7 @@ namespace ChatWithBot
                                         messageBot.Content = b.Move(choice[^1]);
                                         messageBot.dateTime = DateTime.Now;
                                         messageBot.OutUser = b.NameBot;
-                                    }
-                               
+                                    }                               
                                 }
                                 Console.WriteLine($"id={messageBot.IdMessage} { messageBot.OutUser} {messageBot.dateTime} ({ messageBot.user.Name}) : {messageBot.Content}");
                                 chat.ListMessage.Add(messageBot);
@@ -230,11 +231,26 @@ namespace ChatWithBot
                             Console.WriteLine("Вы не можете писать в чать не являись участником");
                         }
                         break;
+                    case "signb":
+                        var ListBot = BinaryHelper.GetAllBot().Where(b=>b.NameBot==choice[1]).FirstOrDefault();
+                        if (ListBot != null && !chat.ChatBot.Contains(ListBot))
+                        {
+                            chat.ChatBot.Add(ListBot);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Такого бота нет ((");
+                        }
+                        break;
                     case "stop-chat":
-                        chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
-                        chat.ChatLogUsers[user.Name].StopChat = DateTime.Now;
-                        chat.Users.Remove(user);
-                        flagStop = false;
+                        if (chat.Users.Where(u=>user.Name==u.Name).Any())
+                        {
+                            chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
+                            chat.ChatLogUsers[user.Name].StopChat = DateTime.Now;
+                            chat.Users.Remove(user);
+                            Chat.Chats.Remove(chat);
+                            flagStop = false;
+                        }
                         break;
                     case "0":
                         flagStop = false;
@@ -255,7 +271,7 @@ namespace ChatWithBot
                     {
                         mes = chat.ListMessage.Where(m => m.dateTime < chat.ChatLogUsers[user.Name].StopChat);
                     }
-                    if (mes.Any())
+                    if (mes.Any()) 
                     {
                         foreach (var m in mes)
                         {

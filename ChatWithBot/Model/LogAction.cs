@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ChatWithBot.Model
 {
+    /// <summary>
+    /// Логирует действия в чате 
+    /// </summary>
     [Serializable]
     class LogAction
     {
