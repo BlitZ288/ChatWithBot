@@ -15,5 +15,6 @@ namespace ChatWithBot.Interface
         /// <param name="command"></param>
         /// <returns></returns>
         public string Move(string command);
+        public StringBuilder GetAllCommand();
     }
 }

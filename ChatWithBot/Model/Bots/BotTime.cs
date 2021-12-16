@@ -24,16 +24,30 @@ namespace ChatWithBot.Model.Bots
         }
         public string Move(string command)
         {
-            command = command.Replace("/", "");
-            if (command.Equals("current"))
+            try{
+                command = command.Replace("/", "");
+                if (command.Equals("current"))
+                {
+                    return DateTime.Now.ToString("HH:mm");
+                }
+                else
+                {
+                    return DateTime.Now.AddMinutes(Convert.ToDouble(command)).ToString("HH:mm");
+                }
+             }
+            catch
             {
-                return DateTime.Now.ToString("HH:mm");
+                Console.WriteLine("Некорректная команда");
+                return "";
             }
-            else
-            {
-                return DateTime.Now.AddMinutes(Convert.ToDouble(command)).ToString("HH:mm");
-            }
-            
+
+        }
+        public StringBuilder GetAllCommand()
+        {
+            StringBuilder command = new StringBuilder("");
+            command.Append("/current-Узнать текущие время");
+            command.Append("\n" + "/Через time");
+            return command;
         }
     }
 }

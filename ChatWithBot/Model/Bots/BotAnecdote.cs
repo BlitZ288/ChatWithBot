@@ -40,5 +40,14 @@ namespace ChatWithBot.Model.Bots
                 return "Такого анекдота нет((((";
             }
         }
+        public StringBuilder GetAllCommand()
+        {
+            StringBuilder command = new StringBuilder("");
+            foreach(var a in ListAnecdot)
+            {
+                command.Append("/"+a.Key+"\n");
+            }
+            return command;
+        }
     }
 }

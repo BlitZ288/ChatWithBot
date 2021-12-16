@@ -76,42 +76,7 @@ namespace ChatWithBot
 
             };
             return Bots;
-        }
-        //public static void WriterBinarFile(List<Chat> chat)
-        //{
-        //    try
-        //    {
-        //        // создаем объект BinaryWriter
-        //        using (BinaryWriter writer = new BinaryWriter(File.Open("Chat.dat", FileMode.OpenOrCreate)))
-        //        {
-        //            // записываем в файл значение каждого поля структуры
-        //            foreach ( var c in chat)
-        //            {
-        //                writer.Write("~");
-        //                writer.Write(c.Name);
-        //                writer.Write("-");
-        //                foreach (var u in c.Users)
-        //                {
-        //                    writer.Write(u.Name);
-        //                }
-        //                writer.Write("-");
-        //                foreach(var mes in c.ListMessage)
-        //                {
-        //                    writer.Write(mes.IdMessage);
-        //                    writer.Write(mes.dateTime.ToString());
-        //                    writer.Write(mes.user.Name);
-        //                    writer.Write(mes.OutUser);
-        //                    writer.Write(mes.Content);
-        //                }
-        //                writer.Write("-");
-        //                for(int i =0; i<c.)
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e.Message);
-        //    }
-        //}
+        }      
             
     }
 }

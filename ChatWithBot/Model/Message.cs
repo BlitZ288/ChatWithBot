@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatWithBot.Model
 {
@@ -13,7 +10,26 @@ namespace ChatWithBot.Model
         public string Content { get; set; }
         public DateTime dateTime { get; set; }
         public string OutUser { get; set; }
-
         public User user;
+
+       public static Message CreatMessage(int index ,string content, string nameSend,Chat chat,User user)
+        {
+            Message message = new Message();           
+            var Senduser = chat.Users.Where(c => c.Name.Equals(nameSend)).FirstOrDefault();
+            message.IdMessage = index;
+            if (Senduser != null)
+            {
+                message.Content = content;
+                message.dateTime = DateTime.Now;
+                message.OutUser = Senduser.Name;
+                message.user = user;
+            }
+            else
+            {
+                Console.WriteLine("Этого пользователя нет в чате");
+            }
+            return message;
+
+        }
     }
 }
