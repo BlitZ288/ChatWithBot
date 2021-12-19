@@ -27,6 +27,7 @@ namespace ChatWithBot.Model
             else
             {
                 Console.WriteLine("Этого пользователя нет в чате");
+                return null;
             }
             return message;
 

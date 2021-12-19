@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatWithBot.Interface;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,9 +25,9 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="NameInvite"></param>
-        public void SignUser(Chat chat, string NameInvite)
+        public void SignUser(Chat chat, string NameInvite, IContext context)
         {  
-            var Inviteuser = BinaryHelper.GetUsers().Where(u => u.Name == NameInvite).FirstOrDefault();    
+            var Inviteuser = context.GetUsers().Where(u => u.Name == NameInvite).FirstOrDefault();    
             if (Inviteuser != null && !chat.Users.Contains(Inviteuser))
             {
                 if (!chat.ChatLogUsers.ContainsKey(NameInvite))
@@ -38,7 +39,7 @@ namespace ChatWithBot.Model
                     chat.ChatLogUsers[NameInvite].StopChat = null;
                 }
                 chat.Users.Add(Inviteuser);
-                Console.WriteLine($"Пользователь {NameInvite} приглашен");
+                Console.WriteLine($"Пользователь {NameInvite} присоединился");
             }
             else
             {
@@ -126,17 +127,21 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="NameBot"></param>
-        public void InviteBot(Chat chat, string NameBot)
+        public void InviteBot(Chat chat,IContext context)
         {
-            var ListBot = BinaryHelper.GetAllBot().Where(b => b.NameBot == NameBot).FirstOrDefault();
-            if (ListBot != null && !chat.ChatBot.Contains(ListBot))
+            var ListBots = context.GetAllBot();
+            Console.WriteLine("Доступны боты:");
+            int i = 1;
+            foreach (var b in ListBots)
             {
-                chat.ChatBot.Add(ListBot);
-                Console.WriteLine("Бот успешно добавлен");
+                Console.WriteLine($"{i} {b.NameBot}");
+                i++;
             }
-            else
+            int PickBot = Convert.ToInt32(Console.ReadLine().Trim());
+            if (PickBot != 0)
             {
-                Console.WriteLine("Такого бота нет ((");
+                chat.ChatBot.Add(ListBots[PickBot - 1]);
+                Console.WriteLine("Бот успешно добавлен");
             }
         }
         public override bool Equals(object obj)

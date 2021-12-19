@@ -11,17 +11,24 @@ namespace ChatWithBot
         static void Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать");
-            var AllChat = BinaryHelper.GetAllChats();
-            User user ;
+            IContext context = new BinaryHelper();
+            User user1 = new User()
+            {
+                Name = "Kiril"
+            };
+            //BinaryHelper.AddUser(BinaryHelper.GetChatt("FirstChat"), user1);
+           // var a= BinaryHelper.GetChatts();
+            var  AllChat = context.GetAllChats();
+            User user;
             Console.WriteLine("Ваше имя:");
             string UserName = Console.ReadLine().Trim();            
-            var ListUser = BinaryHelper.GetUsers();
+            var ListUser = context.GetUsers();
             user = ListUser.Find(u => u.Name.Equals(UserName));
             if (user == null)
             {
                 user = new User(UserName);
                 ListUser.Add(user);
-                BinaryHelper.CreatUser(ListUser);
+                context.CreatUser(ListUser);
             }           
             Console.WriteLine(" Cписок доступных команд\n create-chat\n start-chat \n");
             bool showMenu = true;
@@ -31,21 +38,27 @@ namespace ChatWithBot
                 switch (choice)
                 {
                     case "create-chat":
-                        Chat.CreateChat(user, AllChat);                       
+                        Chat Newchat = new Chat();
+                        Newchat = Newchat.CreateChat(user, AllChat,context);
+                        //BinaryHelper.AddChat(Newchat);
+                      //var s=  BinaryHelper.GetChatts();
+                        //BinaryHelper.GetChatt("SecondChat");
+                        
+                        DialogChat(user, Newchat, AllChat,context);
                         break;
                     case "start-chat":
-                        Chat.StartChat(AllChat);
-                        int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
-                        if (AllChat.Count == 0)
+                        Chat chat= new Chat();
+                        if (chat.StartChat(AllChat))
                         {
-                            Console.WriteLine("Доступных чатов нет");
-                            break;
+                            int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
+                            chat = AllChat[chociChat];
+                            DialogChat(user, chat, AllChat,context);
+                            showMenu = false;
+                            context.CreatChat(AllChat);
                         }
                         else
                         {
-                            DialogChat(user, AllChat[chociChat], AllChat);
-                            showMenu = false;
-                            BinaryHelper.CreatChat(AllChat);
+                            Console.WriteLine("Для создания чата введите:\n create-chat");
                         }
                         break;
                     default:
@@ -53,9 +66,8 @@ namespace ChatWithBot
                         break;
                 }
             }
-            
         }
-        static void DialogChat( User user,Chat chat,List<Chat> chats)
+        static void DialogChat( User user,Chat chat,List<Chat> chats,IContext context)
         {
             bool flagNewChat = true;
             int indexmesseg = 0;
@@ -65,17 +77,21 @@ namespace ChatWithBot
             {
                 Console.WriteLine($"{u.Name}");
             }
-            flagNewChat = Chat.GetHistoryChat(chat, user);
+            flagNewChat = chat.GetHistoryChat(chat, user);
            // DialogHistoryChat(user, chat, ref flagNewChat); 
             Console.WriteLine("Доступные команды ");
             Console.WriteLine(" sign @username \n logut @username\n add-mes @username ``message``\n" +
               " del-mes messageId \n bot @botname @username /bot-command\n stop-сhat \n signb @botname\n 0-Сохранить и выйти\n");
-            Console.WriteLine("Команды для ботов \n");
-            foreach(var b in chat.ChatBot)
+            if (chat.ChatBot.Count > 0)
             {
-                Console.WriteLine($"Название бота {b.NameBot}");
-                Console.WriteLine(b.GetAllCommand()+"\n");
+                Console.WriteLine("Команды для ботов \n");
+                foreach (var b in chat.ChatBot)
+                {
+                    Console.WriteLine($"Название бота {b.NameBot}");
+                    Console.WriteLine(b.GetAllCommand() + "\n");
+                }
             }
+           
             bool flagStop = true;
             while (flagStop)
             {
@@ -84,7 +100,7 @@ namespace ChatWithBot
                 {
                     case "sign":
                         string NameInvite = choice[1].Replace("@", "");
-                        user.SignUser(chat, NameInvite);                        
+                        user.SignUser(chat, NameInvite,context);                        
                         break;
                     case "logut":
                         NameInvite = choice[1].Replace("@", "");
@@ -92,18 +108,22 @@ namespace ChatWithBot
                         break;
                     case "add-mes":
                         string NameSend = choice[1].Replace("@", "");
-                        if (!flagNewChat)
-                        {
-                            indexmesseg = chat.ListMessage[^1].IdMessage;
-                        }
-                        indexmesseg++;
-                        
+                       
                         if (chat.Users.Contains(user))
                         {
+                            if (!flagNewChat)
+                            {
+                                indexmesseg = chat.ListMessage[^1].IdMessage;
+                            }
+                            indexmesseg++;
                             Console.WriteLine("Сообщение:");
                             string Content = Console.ReadLine().Trim();
-                            var message = Message.CreatMessage(indexmesseg, Content,NameSend, chat, user);
-                            user.SendMessage(message, chat);
+                            var message = Message.CreatMessage(indexmesseg,Content,NameSend,chat,user);
+                            if (message != null)
+                            {
+                                user.SendMessage(message, chat);
+                                Console.WriteLine("Введите команду:");
+                            }
                         }
                         else
                         {
@@ -116,15 +136,17 @@ namespace ChatWithBot
                         break;
                     case "bot":  
                         NameSend = choice[2].Replace("@", "");
-                        if (!flagNewChat)
-                        {
-                            indexmesseg = chat.ListMessage[^1].IdMessage;
-                        }
-                        indexmesseg++;
+                       
                         if (chat.Users.Contains(user))
                         {
+
                             if(chat.ChatBot.Where(b => b.NameBot == choice[1].Replace("@", "")).Any())
                             {
+                                if (!flagNewChat)
+                                {
+                                    indexmesseg = chat.ListMessage[^1].IdMessage;
+                                }
+                                indexmesseg++;
                                 string Contetn = "";
                                 foreach (var b in chat.ChatBot)
                                 {
@@ -148,7 +170,7 @@ namespace ChatWithBot
                         }                       
                         break;
                     case "signb":
-                        user.InviteBot(chat, choice[1]);                       
+                        user.InviteBot(chat,context);                       
                         break;
                     case "stop-chat":
                             user.DelChat(chat, user, chats);
@@ -159,8 +181,6 @@ namespace ChatWithBot
                         break;
                 }
             }
-        
-
         }   
     }
     

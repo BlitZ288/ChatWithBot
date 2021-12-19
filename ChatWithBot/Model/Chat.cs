@@ -22,29 +22,25 @@ namespace ChatWithBot.Model
         public Dictionary<string, LogsUser> ChatLogUsers = new Dictionary<string, LogsUser>();
 
         public List<IBot> ChatBot = new List<IBot>();
-        public static void CreateChat(User user, List<Chat> chats)
+        public Chat CreateChat(User user, List<Chat> chats,IContext context)
         {
             Chat chat = new Chat();
             Console.WriteLine("Название чата:");
-            chat.Name = Console.ReadLine().Trim();
-            Console.WriteLine("Доступны боты:");
-            int i = 1;
-            var ListBots = BinaryHelper.GetAllBot();
-            foreach (var b in ListBots)
-            {
-                Console.WriteLine($"{i} {b.NameBot}");
-                i++;
-            }
+            chat.Name = Console.ReadLine().Trim();         
             chat.Users.Add(user);
             chat.ChatLogUsers.Add(user.Name, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
-            chat.ChatBot.Add(ListBots[Convert.ToInt32(Console.ReadLine().Trim()) - 1]);        
             chats.Add(chat);
-            BinaryHelper.CreatChat(chats);
+            context.CreatChat(chats);
             Console.WriteLine("Чат успешно создан");
+            return chat;
         }
-        public static void StartChat(List<Chat> chats)
+        public  bool StartChat(List<Chat> chats)
         {
-                   
+            if (chats.Count == 0)
+            {
+                Console.WriteLine("Доступных чатов нет");
+                return false;
+            }
             int j = 1;
             Console.WriteLine("Доступные чаты:");
             foreach (var c in chats)
@@ -56,10 +52,12 @@ namespace ChatWithBot.Model
                     Console.Write($"\t {b.NameBot} \n");
                 }
                 j++;
+                Console.WriteLine("");
             }
-            Console.WriteLine("В какой хотете войти:");       
+            Console.WriteLine("В какой хотите войти:");
+            return true;
         }
-        public static bool GetHistoryChat(Chat chat, User user)
+        public  bool GetHistoryChat(Chat chat, User user)
         {
 
             try
