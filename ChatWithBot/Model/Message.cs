@@ -15,10 +15,10 @@ namespace ChatWithBot.Model
        public static Message CreatMessage(int index ,string content, string nameSend,Chat chat,User user)
         {
             Message message = new Message();           
-            var Senduser = chat.Users.Where(c => c.Name.Equals(nameSend)).FirstOrDefault();
-            message.IdMessage = index;
+            var Senduser = chat.Users.Where(c => c.Name.Equals(nameSend)).FirstOrDefault();          
             if (Senduser != null)
             {
+                message.IdMessage = index;
                 message.Content = content;
                 message.dateTime = DateTime.Now;
                 message.OutUser = Senduser.Name;
