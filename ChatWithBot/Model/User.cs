@@ -25,7 +25,7 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="NameInvite"></param>
-        public void SignUser(Chat chat, string NameInvite, IContext context)
+        public bool SignUser(Chat chat, string NameInvite, IContext context)
         {  
             var Inviteuser = context.GetUsers().Where(u => u.Name == NameInvite).FirstOrDefault();    
             if (Inviteuser != null && !chat.Users.Contains(Inviteuser))
@@ -39,11 +39,11 @@ namespace ChatWithBot.Model
                     chat.ChatLogUsers[NameInvite].StopChat = null;
                 }
                 chat.Users.Add(Inviteuser);
-                Console.WriteLine($"Пользователь {NameInvite} присоединился");
+                return true;
             }
             else
             {
-                Console.WriteLine("Пользователя с таким именем не найдент или уже в чате ");
+                return false;
             }
         }
         /// <summary>
@@ -84,7 +84,7 @@ namespace ChatWithBot.Model
         public void SendMessage(Message message,Chat chat)
         {
             chat.ListMessage.Add(message);
-            Console.WriteLine($"id={message.IdMessage} {message.user.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
+            Console.WriteLine($"id={message.IdMessage+1} {message.user.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
         }
         /// <summary>
         /// Удалить сообщение 
@@ -94,16 +94,22 @@ namespace ChatWithBot.Model
         /// <param name="user"></param>
         public void DelMessage(Chat chat, int index, User user)
         {
-            Message ChoiceMessage = chat.ListMessage[index];
-            //chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
-            if (ChoiceMessage.user.Equals(user) && DateTime.Now.Subtract(ChoiceMessage.dateTime) < new TimeSpan(60, 0, 0))
+            try
             {
-                chat.ListMessage.Remove(ChoiceMessage);
-                Console.WriteLine("Сообщение успешно удаленно ");
-            }
-            else
+                Message ChoiceMessage = chat.ListMessage[index];
+                if (ChoiceMessage.user.Equals(user) && DateTime.Now.Subtract(ChoiceMessage.dateTime) < new TimeSpan(60, 0, 0))
+                {
+                    chat.ListMessage.Remove(ChoiceMessage);
+                    Console.WriteLine("Сообщение успешно удаленно ");
+                }
+                else
+                {
+                    Console.WriteLine("Вы не можете удалить это сообщение. Вы не являетесь его владельцем либо прошло слишком много времени");
+                }
+
+            }catch(ArgumentOutOfRangeException e)
             {
-                Console.WriteLine("Вы не можете удалить это сообщение. Вы не являетесь его владельцем либо прошло слишком много времени");
+                Console.WriteLine("Сообщение с таким номер нет");
             }
 
         }
@@ -112,14 +118,18 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="user"></param>
-        public void DelChat(Chat chat,User user,List<Chat> chats)
+        public bool DelChat(Chat chat,User user,List<Chat> chats)
         {
             if (chat.Users.Contains(user))
             {
                 chat.ChatLogUsers[user.Name].StopChat = DateTime.Now;
                 chat.Users.Remove(user);
                 chats.Remove(chat);
-                Console.WriteLine("Чат упешео удален");
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
         /// <summary>
@@ -140,8 +150,11 @@ namespace ChatWithBot.Model
             int PickBot = Convert.ToInt32(Console.ReadLine().Trim());
             if (PickBot != 0)
             {
-                chat.ChatBot.Add(ListBots[PickBot - 1]);
+                IBot bot = ListBots[PickBot - 1];
+                chat.ChatBot.Add(bot);
                 Console.WriteLine("Бот успешно добавлен");
+                Console.WriteLine("Команды для бота \n");
+                Console.WriteLine(bot.GetAllCommand() + "\n");
             }
         }
         public override bool Equals(object obj)

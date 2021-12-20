@@ -19,9 +19,21 @@ namespace ChatWithBot.Model
       
         public List<Message> ListMessage = new List<Message>();
 
+        public List<LogAction> LogActions = new List<LogAction>();
+
         public Dictionary<string, LogsUser> ChatLogUsers = new Dictionary<string, LogsUser>();
 
         public List<IBot> ChatBot = new List<IBot>();
+        public Chat(User user, string name)
+        {
+            Name = name;
+            Users.Add(user);
+            ChatLogUsers.Add(user.Name, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
+        }
+        public Chat()
+        {
+        }
+
         public Chat CreateChat(User user, List<Chat> chats,IContext context)
         {
             Chat chat = new Chat();
@@ -34,7 +46,11 @@ namespace ChatWithBot.Model
             Console.WriteLine("Чат успешно создан");
             return chat;
         }
-        public  bool StartChat(List<Chat> chats)
+        public void AddLogChat(Chat chat , string eventChat, User user)
+        {
+            chat.LogActions.Add(new LogAction(DateTime.Now, eventChat, user.Name));          
+        }
+        public bool StartChat(List<Chat> chats)
         {
             if (chats.Count == 0)
             {
@@ -57,7 +73,7 @@ namespace ChatWithBot.Model
             Console.WriteLine("В какой хотите войти:");
             return true;
         }
-        public  bool GetHistoryChat(Chat chat, User user)
+        public bool GetHistoryChat(Chat chat, User user)
         {
 
             try
@@ -73,7 +89,7 @@ namespace ChatWithBot.Model
                     {
                         foreach (var m in mes)
                         {
-                            Console.WriteLine($"id={m.IdMessage} {m.dateTime} {m.user.Name} ({m.OutUser}): {m.Content} ");
+                            Console.WriteLine($"id={m.IdMessage+1} {m.dateTime} {m.user.Name} ({m.OutUser}): {m.Content} ");
                         }
                        return false;
                     }
