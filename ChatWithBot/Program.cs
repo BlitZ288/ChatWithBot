@@ -12,18 +12,12 @@ namespace ChatWithBot
             Console.WriteLine("Добро пожаловать");
             IContext context = new BinaryHelper();
             ChatApp chatApp = new ChatApp(context);
-            var AllChat = context.GetAllChats();
-            User user;
+           // var AllChat = context.GetAllChats();
+
             Console.WriteLine("Ваше имя:");
             string UserName = Console.ReadLine().Trim();
-            var ListUser = context.GetUsers();
-            user = ListUser.Find(u => u.Name.Equals(UserName));
-            if (user == null)
-            {
-                user = new User(UserName);
-                ListUser.Add(user);
-                context.CreatUser(ListUser);
-            }
+            User user=chatApp.GetUser(UserName);
+           
             Console.WriteLine(" Cписок доступных команд\n create-chat\n start-chat \n");
             bool showMenu = true;
             while (showMenu)
@@ -37,14 +31,12 @@ namespace ChatWithBot
                         Chat Newchat = new Chat(user, NameChat);
                         chatApp.CreateChat(Newchat);
                         Console.WriteLine("Чат успешно создан");
-                        //Newchat = Newchat.CreateChat(user, AllChat,context);
                         /*Пока под вопросом
                         Newchat.AddLogChat(Newchat, choice, user);
                         */
-                        DialogChat(user, Newchat, context, chatApp);
+                        DialogChat(user, Newchat, chatApp);
                         break;
                     case "start-chat":
-                        Chat chat = new Chat();
                         if (chatApp.ListChats.Count == 0)
                         {
                             Console.WriteLine("Доступных чатов нет");
@@ -62,17 +54,15 @@ namespace ChatWithBot
                                 Console.Write($"\t {b.NameBot} \n");
                             }
                             j++;
-                            Console.WriteLine("");
                         }
                         Console.WriteLine("В какой хотите войти:");
                         try
                         {
                             int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
-                            chat = chatApp.ListChats[chociChat];
-                            chat.AddLogChat(chat, choice, user);
-                            DialogChat(user, chat, context, chatApp);
+                            Chat chat = chatApp.ListChats[chociChat];
+                            //chat.AddLogChat(chat, choice, user);
+                            DialogChat(user, chat, chatApp);
                             showMenu = false;
-                            context.CreatChat(AllChat);
                         }
                         catch (FormatException)
                         {
@@ -89,16 +79,14 @@ namespace ChatWithBot
                 }
             }
         }
-        static void DialogChat(User user, Chat chat, IContext context, ChatApp chatApp)
+        static void DialogChat(User user, Chat chat,  ChatApp chatApp)
         {
-            //ChatApp chatApp = new ChatApp(context);
             Console.WriteLine("Список участников данного чата : ");
             foreach (var u in chat.Users)
             {
                 Console.WriteLine($"{u.Name}");
             }
             Console.WriteLine(chatApp.GetHistoryChat(chat, user));
-            //chat.GetHistoryChat(chat, user);
             string listCommand = " sign @username \n logut @username\n add-mes @username ``message``\n" +
               " del-mes messageId \n bot @botname @username /bot-command\n stop-сhat \n signb \n 0-Сохранить и выйти\n";
             Console.WriteLine("Доступные команды ");
@@ -112,7 +100,6 @@ namespace ChatWithBot
                     Console.WriteLine(b.GetAllCommand() + "\n");
                 }
             }
-
             bool flagStop = true;
             while (flagStop)
             {
@@ -156,8 +143,7 @@ namespace ChatWithBot
                         {
                             Console.WriteLine(e.Message);
                         }
-                        //user.LogutUser(chat, user, NameInvite);
-                        chat.AddLogChat(chat, CommandParts[0], user);
+                        chat.AddLogChat(chat, CommandParts[0], user);////Как по умному залогировать ???
                         break;
                     case "add-mes":
                         string NameSend = CommandParts[1].Replace("@", "");
@@ -207,7 +193,8 @@ namespace ChatWithBot
                         {
                             string botName = CommandParts[1].Replace("@", "");
                             string commadBot = CommandParts[^1];
-                            chatApp.BotMove(chat, user, botName, commadBot);
+                            var message=chatApp.BotMove(chat, user, botName, commadBot);
+                            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
                         }
                         catch (FormatException)
                         {
@@ -256,17 +243,15 @@ namespace ChatWithBot
                         }
                         break;
                     case "stop-chat":
-                        //if(user.DelChat(chat, user, chats))
-                        //{
-                        //    Console.WriteLine("Чат упешео удален");
-                        //    chat.AddLogChat(chat, CommandParts[0], user);
-                        //    context.CreatChat(chats);
-                        //    flagStop = false;
-                        //}
-                        //else
-                        //{
-                        //    Console.WriteLine("Вы не можете удалить чат, не являясь его участником");
-                        //}
+                        try
+                        {
+                            chatApp.DeleteChat(chat, user);
+                            Console.WriteLine("Чат упешео удален");
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                         break;
                     case "0":
                         flagStop = false;

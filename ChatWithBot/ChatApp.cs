@@ -24,13 +24,41 @@ namespace ChatWithBot
             Bots = context.GetAllBot();
         }
        
+        public User GetUser(string userName)
+        {
+            User user = Users.Find(u => u.Name.Equals(userName));
+            if (user == null)
+            {
+                user = new User(userName);
+                Users.Add(user);
+                Context.CreatUser(Users);
+                return user;
+            }
+            else
+            {
+                return user;
+            }
+        }
         public void CreateChat(Chat chat)
         {
-            
             ListChats.Add(chat);
             Context.CreatChat(ListChats);
         }
-        public string GetHistoryChat(Chat chat , User user)
+        public void DeleteChat(Chat chat, User user)
+        {
+            if (chat.Users.Contains(user))
+            {
+                chat.ChatLogUsers[user.Name].StopChat = DateTime.Now;
+                chat.Users.Remove(user);
+                ListChats.Remove(chat);
+                Context.CreatChat(ListChats);
+            }
+            else
+            {
+                throw new Exception("Вы не можете удалить чат, не являясь его участником");
+            }
+        }
+        public  string GetHistoryChat(Chat chat , User user)
         {
             string result = "";
             try
@@ -58,7 +86,6 @@ namespace ChatWithBot
             }
             return result;
         }
-        
         public void InviteUser(Chat chat,User user,string nameInvite)
         {
             var Inviteuser = Context.GetUsers().Where(u => u.Name == nameInvite).FirstOrDefault();
@@ -99,7 +126,7 @@ namespace ChatWithBot
         {
             user.DelMessage(chat, index, user);
         }
-        public void BotMove(Chat chat, User user, string botName,string command)
+        public Message BotMove(Chat chat, User user, string botName,string command)
         {
             if (chat.Users.Contains(user))
             {
@@ -118,6 +145,11 @@ namespace ChatWithBot
                         var message = new Message(Contetn, botName, chat, user); ///Есть вывод в консоль на условие
                         chat.ListMessage.Add(message);
                         Context.CreatChat(ListChats);
+                        return message;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Некорректная команда");
                     }
                 }
                 else

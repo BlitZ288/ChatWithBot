@@ -37,7 +37,7 @@ namespace ChatWithBot.Model.Bots
             }
             else
             {
-                return "Такого анекдота нет((((";
+                return String.Empty;
             }
         }
         public StringBuilder GetAllCommand()

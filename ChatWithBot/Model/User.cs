@@ -62,16 +62,6 @@ namespace ChatWithBot.Model
 
         }
         /// <summary>
-        /// Отправить сообщение 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="chat"></param>
-        public void SendMessage(Message message, Chat chat)
-        {
-            chat.ListMessage.Add(message);
-            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
-        }
-        /// <summary>
         /// Удалить сообщение 
         /// </summary>
         /// <param name="chat"></param>
@@ -107,31 +97,6 @@ namespace ChatWithBot.Model
             else
             {
                 return false;
-            }
-        }
-        /// <summary>
-        /// Пригласить бота 
-        /// </summary>
-        /// <param name="chat"></param>
-        /// <param name="NameBot"></param>
-        public void InviteBot(Chat chat, IContext context)
-        {
-            var ListBots = context.GetAllBot();
-            Console.WriteLine("Доступны боты:");
-            int i = 1;
-            foreach (var b in ListBots)
-            {
-                Console.WriteLine($"{i} {b.NameBot}");
-                i++;
-            }
-            int PickBot = Convert.ToInt32(Console.ReadLine().Trim());
-            if (PickBot != 0)
-            {
-                IBot bot = ListBots[PickBot - 1];
-                chat.ChatBot.Add(bot);
-                Console.WriteLine("Бот успешно добавлен");
-                Console.WriteLine("Команды для бота \n");
-                Console.WriteLine(bot.GetAllCommand() + "\n");
             }
         }
         public override bool Equals(object obj)

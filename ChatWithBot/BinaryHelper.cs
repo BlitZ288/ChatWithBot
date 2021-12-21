@@ -50,11 +50,10 @@ namespace ChatWithBot
                     deserilizeUser = (List<User>)formatter.Deserialize(fs);
                     return deserilizeUser;
                 }
-                catch (SerializationException e)
+                catch (SerializationException)
                 {
                     return deserilizeUser;
                 }
-
             }
 
         }
