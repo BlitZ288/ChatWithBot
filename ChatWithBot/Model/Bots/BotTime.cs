@@ -37,8 +37,8 @@ namespace ChatWithBot.Model.Bots
              }
             catch
             {
-                Console.WriteLine("Некорректная команда");
-                return null;
+               // Console.WriteLine("Некорректная команда");
+                return "Некорректная команда";
             }
 
         }

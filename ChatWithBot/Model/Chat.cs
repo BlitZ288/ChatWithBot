@@ -89,7 +89,7 @@ namespace ChatWithBot.Model
                     {
                         foreach (var m in mes)
                         {
-                            Console.WriteLine($"id={m.IdMessage+1} {m.dateTime} {m.user.Name} ({m.OutUser}): {m.Content} ");
+                            Console.WriteLine($"id={m.IdMessage+1} {m.dateTime} {m.User.Name} ({m.OutUser}): {m.Content} ");
                         }
                        return false;
                     }

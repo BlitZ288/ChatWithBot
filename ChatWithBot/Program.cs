@@ -1,7 +1,6 @@
 ﻿using ChatWithBot.Interface;
 using ChatWithBot.Model;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ChatWithBot
@@ -13,10 +12,10 @@ namespace ChatWithBot
             Console.WriteLine("Добро пожаловать");
             IContext context = new BinaryHelper();
             ChatApp chatApp = new ChatApp(context);
-            var  AllChat = context.GetAllChats();
+            var AllChat = context.GetAllChats();
             User user;
             Console.WriteLine("Ваше имя:");
-            string UserName = Console.ReadLine().Trim();            
+            string UserName = Console.ReadLine().Trim();
             var ListUser = context.GetUsers();
             user = ListUser.Find(u => u.Name.Equals(UserName));
             if (user == null)
@@ -24,7 +23,7 @@ namespace ChatWithBot
                 user = new User(UserName);
                 ListUser.Add(user);
                 context.CreatUser(ListUser);
-            }           
+            }
             Console.WriteLine(" Cписок доступных команд\n create-chat\n start-chat \n");
             bool showMenu = true;
             while (showMenu)
@@ -38,15 +37,14 @@ namespace ChatWithBot
                         Chat Newchat = new Chat(user, NameChat);
                         chatApp.CreateChat(Newchat);
                         Console.WriteLine("Чат успешно создан");
-                        
                         //Newchat = Newchat.CreateChat(user, AllChat,context);
                         /*Пока под вопросом
                         Newchat.AddLogChat(Newchat, choice, user);
                         */
-                        DialogChat(user, Newchat, AllChat,context);
+                        DialogChat(user, Newchat, context, chatApp);
                         break;
                     case "start-chat":
-                        Chat chat= new Chat();
+                        Chat chat = new Chat();
                         if (chatApp.ListChats.Count == 0)
                         {
                             Console.WriteLine("Доступных чатов нет");
@@ -57,29 +55,33 @@ namespace ChatWithBot
                         Console.WriteLine("Доступные чаты:");
                         foreach (var c in chatApp.ListChats)
                         {
-                           Console.Write($"\t {j} {c.Name}");
-                           Console.Write("\t Боты:");
-                           foreach (var b in c.ChatBot)
+                            Console.Write($"\t {j} {c.Name}");
+                            Console.Write("\t Боты:");
+                            foreach (var b in c.ChatBot)
                             {
-                               Console.Write($"\t {b.NameBot} \n");
+                                Console.Write($"\t {b.NameBot} \n");
                             }
                             j++;
-                           Console.WriteLine("");
+                            Console.WriteLine("");
                         }
-                           Console.WriteLine("В какой хотите войти:");
-                            try
-                            {                           
-                                int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
-                                chat = AllChat[chociChat];
-                                chat.AddLogChat(chat, choice, user);
-                                DialogChat(user, chat, AllChat,context);
-                                showMenu = false;
-                                context.CreatChat(AllChat);
-                            }
-                            catch (FormatException e)
-                            {
-                                Console.WriteLine("Неверный формат ввода");
-                            }
+                        Console.WriteLine("В какой хотите войти:");
+                        try
+                        {
+                            int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
+                            chat = chatApp.ListChats[chociChat];
+                            chat.AddLogChat(chat, choice, user);
+                            DialogChat(user, chat, context, chatApp);
+                            showMenu = false;
+                            context.CreatChat(AllChat);
+                        }
+                        catch (FormatException)
+                        {
+                            Console.WriteLine("Неверный формат ввода");
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            Console.WriteLine("Неверный формат ввода");
+                        }
                         break;
                     default:
                         Console.WriteLine("Введинте одну из команд:\n create-chat \n start-chat");
@@ -87,9 +89,9 @@ namespace ChatWithBot
                 }
             }
         }
-        static void DialogChat( User user,Chat chat,List<Chat> chats,IContext context)
+        static void DialogChat(User user, Chat chat, IContext context, ChatApp chatApp)
         {
-            ChatApp chatApp = new ChatApp(context);
+            //ChatApp chatApp = new ChatApp(context);
             Console.WriteLine("Список участников данного чата : ");
             foreach (var u in chat.Users)
             {
@@ -110,7 +112,7 @@ namespace ChatWithBot
                     Console.WriteLine(b.GetAllCommand() + "\n");
                 }
             }
-           
+
             bool flagStop = true;
             while (flagStop)
             {
@@ -118,114 +120,153 @@ namespace ChatWithBot
                 switch (CommandParts[0])
                 {
                     case "sign":
+                        /*
+                         Можно перенсти в Chatapp весь метод 
+                         */
                         string NameInvite = CommandParts[1].Replace("@", "");
-                        user.SignUser(chat, NameInvite,context);
-                        chat.AddLogChat(chat, CommandParts[0], user);
-                        context.CreatChat(chats);
+                        try
+                        {
+                            chatApp.InviteUser(chat, user, NameInvite);
+                            Console.WriteLine($"Пользователь {NameInvite} успешно присоединился");
+                        }
+                        catch (ArgumentNullException e)
+                        {
+                            Console.WriteLine(e.ParamName);
+                        }
+                        catch (ArgumentException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                         break;
                     case "logut":
+                        /*
+                        Можно перенсти в Chatapp весь метод , убрать выводы в консоль
+                        */
                         NameInvite = CommandParts[1].Replace("@", "");
-                        user.LogutUser(chat, user, NameInvite);
+                        try
+                        {
+                            chatApp.DeleteUser(chat, user, NameInvite);
+                            Console.WriteLine($"Пользователь {NameInvite} успешно удален");
+                        }
+                        catch (ArgumentNullException e)
+                        {
+                            Console.WriteLine(e.ParamName);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                        //user.LogutUser(chat, user, NameInvite);
                         chat.AddLogChat(chat, CommandParts[0], user);
-                        context.CreatChat(chats);
                         break;
                     case "add-mes":
                         string NameSend = CommandParts[1].Replace("@", "");
-                        if (chat.Users.Contains(user))
+                        Console.WriteLine("Сообщение:");
+                        string Content = Console.ReadLine().Trim();
+                        try
                         {
-                            Console.WriteLine("Сообщение:");
-                            string Content = Console.ReadLine().Trim();
-                            var message = Message.CreatMessage(Content,NameSend,chat,user);
-                            if (message != null)
-                            {
-                                user.SendMessage(message, chat);
-                                chat.AddLogChat(chat, CommandParts[0], user);
-                                context.CreatChat(chats);
-                                Console.WriteLine("Введите команду:");
-                            }
+                            var message = chatApp.SendMessege(chat, user, Content, NameSend);
+                            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
+                            // chat.AddLogChat(chat, CommandParts[0], user);
                         }
-                        else
+                        catch (ArgumentNullException e)
                         {
-                            Console.WriteLine("Вы не можете писать в чать не являись участником");
-                            Console.WriteLine("Чтобы присоединиться используйте команду sign @username");
+                            Console.WriteLine(e.ParamName);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
                         }
                         break;
                     case "del-mes":
                         try
                         {
-                            user.DelMessage(chat, Convert.ToInt32(CommandParts[1]) - 1, user);
-                            chat.AddLogChat(chat, CommandParts[0], user);
-                            context.CreatChat(chats);
+                            int IndexMessege = Convert.ToInt32(CommandParts[1]) - 1;
+                            chatApp.DeleteMessge(chat, IndexMessege, user);
+                            Console.WriteLine("Сообщение успешно удаленно ");
+                            // chat.AddLogChat(chat, CommandParts[0], user);
+
                         }
                         catch (FormatException)
                         {
                             Console.WriteLine("Неверный формат ввода");
                         }
-                      
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            Console.WriteLine("Сообщение с таким номер нет");
+
+                        }
+                        catch (ArgumentException e)
+                        {
+                            Console.WriteLine(e.Message);
+
+                        }
                         break;
                     case "bot":
                         try
                         {
-                            NameSend = CommandParts[2].Replace("@", "");
-                            if (chat.Users.Contains(user))
-                            {
-                                string botName = CommandParts[1].Replace("@", "");
-                                if (chat.ChatBot.Where(b => b.NameBot == botName).Any())
-                                {
-                                    string Contetn = "";
-                                    foreach (var b in chat.ChatBot)
-                                    {
-                                        if (b.NameBot == CommandParts[1])
-                                        {
-                                            Contetn = b.Move(CommandParts[^1]);
-                                        }
-                                    }
-                                    if (!String.IsNullOrEmpty(Contetn))
-                                    {
-                                        var message = Message.CreatMessage(Contetn, botName, chat, user);
-                                        user.SendMessage(message, chat);
-                                        chat.AddLogChat(chat, CommandParts[0], user);
-                                        context.CreatChat(chats);
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Такого бота в чатe нет ((");
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine("Вы не можете писать в чать не являись участником");
-                                Console.WriteLine("Чтобы присоединиться используйте команду sign @username");
-                            }
+                            string botName = CommandParts[1].Replace("@", "");
+                            string commadBot = CommandParts[^1];
+                            chatApp.BotMove(chat, user, botName, commadBot);
                         }
                         catch (FormatException)
                         {
                             Console.WriteLine("Неверный формат ввода");
                         }
-                         catch (IndexOutOfRangeException )
+                        catch (IndexOutOfRangeException)
                         {
                             Console.WriteLine("Неверный формат ввода");
                         }
-
+                        catch(ArgumentException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                         break;
                     case "signb":
-                        user.InviteBot(chat,context);
-                        chat.AddLogChat(chat, CommandParts[0], user);
-                        context.CreatChat(chats);
+                        /*
+                         Убираем весь вывод в консоли
+                         */
+                        var ListBots = chatApp.Bots;
+                        Console.WriteLine("Доступны боты:");
+                        int i = 1;
+                        foreach (var b in ListBots)
+                        {
+                            Console.WriteLine($"{i} {b.NameBot}");
+                            i++;
+                        }
+                        try
+                        {
+                            int PickBot = Convert.ToInt32(Console.ReadLine().Trim())-1;
+                            IBot bot = chatApp.InviteBot(PickBot, chat, user);
+                            Console.WriteLine("Бот успешно добавлен");
+                            Console.WriteLine("Команды для бота \n");
+                            Console.WriteLine(bot.GetAllCommand() + "\n");
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            Console.WriteLine("Неверный формат ввода");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                         break;
                     case "stop-chat":
-                        if(user.DelChat(chat, user, chats))
-                        {
-                            Console.WriteLine("Чат упешео удален");
-                            chat.AddLogChat(chat, CommandParts[0], user);
-                            context.CreatChat(chats);
-                            flagStop = false;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Вы не можете удалить чат, не являясь его участником");
-                        }
+                        //if(user.DelChat(chat, user, chats))
+                        //{
+                        //    Console.WriteLine("Чат упешео удален");
+                        //    chat.AddLogChat(chat, CommandParts[0], user);
+                        //    context.CreatChat(chats);
+                        //    flagStop = false;
+                        //}
+                        //else
+                        //{
+                        //    Console.WriteLine("Вы не можете удалить чат, не являясь его участником");
+                        //}
                         break;
                     case "0":
                         flagStop = false;
@@ -236,7 +277,7 @@ namespace ChatWithBot
                         break;
                 }
             }
-        }   
+        }
     }
 
 }

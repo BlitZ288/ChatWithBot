@@ -1,11 +1,7 @@
 ﻿using ChatWithBot.Interface;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatWithBot.Model
 {
@@ -14,7 +10,7 @@ namespace ChatWithBot.Model
     {
         public string Name { get; set; }
 
-         public User(string Name)
+        public User(string Name)
         {
             this.Name = Name;
         }
@@ -25,26 +21,25 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="NameInvite"></param>
-        public bool SignUser(Chat chat, string NameInvite, IContext context)
-        {  
-            var Inviteuser = context.GetUsers().Where(u => u.Name == NameInvite).FirstOrDefault();    
-            if (Inviteuser != null && !chat.Users.Contains(Inviteuser))
+        public void SignUser(Chat chat, User user)
+        {
+            if (!chat.Users.Contains(user))
             {
-                if (!chat.ChatLogUsers.ContainsKey(NameInvite))
+                if (!chat.ChatLogUsers.ContainsKey(user.Name))
                 {
-                    chat.ChatLogUsers.Add(NameInvite, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
+                    chat.ChatLogUsers.Add(user.Name, new LogsUser() { StartChat = DateTime.Now, StopChat = null });
                 }
                 else
                 {
-                    chat.ChatLogUsers[NameInvite].StopChat = null;
+                    chat.ChatLogUsers[user.Name].StopChat = null;
                 }
-                chat.Users.Add(Inviteuser);
-                return true;
+                chat.Users.Add(user);
             }
             else
             {
-                return false;
+                throw new ArgumentException("Пользователь уже в чате ");
             }
+
         }
         /// <summary>
         /// Удалить из чата 
@@ -52,27 +47,17 @@ namespace ChatWithBot.Model
         /// <param name="chat"></param>
         /// <param name="user"></param>
         /// <param name="NameInvite"></param>
-        public void LogutUser(Chat chat,User user, string NameInvite)
+        public void LogutUser(Chat chat, User user, string nameDelete)
         {
-            if (chat.Users.Contains(user))
+            var CickUer = chat.Users.Where(u => u.Name == nameDelete).FirstOrDefault();
+            if (CickUer != null)
             {
-                //chat.LogActions.Add(new LogAction(DateTime.Now, choice[0], user.Name));
-                var CickUer = chat.Users.Where(u => u.Name == NameInvite).FirstOrDefault();
-                if (CickUer != null)
-                {
-                    chat.ChatLogUsers[CickUer.Name].StopChat = DateTime.Now;
-                    chat.Users.Remove(CickUer);
-                    Console.WriteLine($"Пользователь {NameInvite} удален из чата");
-                }
-                else
-                {
-                    Console.WriteLine("Пользователя с таким именем нет");
-                }
+                chat.ChatLogUsers[CickUer.Name].StopChat = DateTime.Now;
+                chat.Users.Remove(CickUer);
             }
             else
             {
-                Console.WriteLine("Вы не являись участником");
-                Console.WriteLine("Чтобы присоединиться используйте команду sign @username");
+                throw new ArgumentNullException("Пользователя с таким именем нет");
             }
 
         }
@@ -81,10 +66,10 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="message"></param>
         /// <param name="chat"></param>
-        public void SendMessage(Message message,Chat chat)
+        public void SendMessage(Message message, Chat chat)
         {
             chat.ListMessage.Add(message);
-            Console.WriteLine($"id={message.IdMessage+1} {message.user.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
+            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
         }
         /// <summary>
         /// Удалить сообщение 
@@ -94,31 +79,23 @@ namespace ChatWithBot.Model
         /// <param name="user"></param>
         public void DelMessage(Chat chat, int index, User user)
         {
-            try
+            Message ChoiceMessage = chat.ListMessage[index];
+            if (ChoiceMessage.User.Equals(user) && DateTime.Now.Subtract(ChoiceMessage.dateTime) < new TimeSpan(60, 0, 0))
             {
-                Message ChoiceMessage = chat.ListMessage[index];
-                if (ChoiceMessage.user.Equals(user) && DateTime.Now.Subtract(ChoiceMessage.dateTime) < new TimeSpan(60, 0, 0))
-                {
-                    chat.ListMessage.Remove(ChoiceMessage);
-                    Console.WriteLine("Сообщение успешно удаленно ");
-                }
-                else
-                {
-                    Console.WriteLine("Вы не можете удалить это сообщение. Вы не являетесь его владельцем либо прошло слишком много времени");
-                }
-
-            }catch(ArgumentOutOfRangeException e)
-            {
-                Console.WriteLine("Сообщение с таким номер нет");
+                chat.ListMessage.Remove(ChoiceMessage);
             }
+            else
+            {
+                throw new ArgumentException("Вы не можете удалить это сообщение. Вы не являетесь его владельцем либо прошло слишком много времени");
 
+            }
         }
         /// <summary>
         /// Удалить чат 
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="user"></param>
-        public bool DelChat(Chat chat,User user,List<Chat> chats)
+        public bool DelChat(Chat chat, User user, List<Chat> chats)
         {
             if (chat.Users.Contains(user))
             {
@@ -137,7 +114,7 @@ namespace ChatWithBot.Model
         /// </summary>
         /// <param name="chat"></param>
         /// <param name="NameBot"></param>
-        public void InviteBot(Chat chat,IContext context)
+        public void InviteBot(Chat chat, IContext context)
         {
             var ListBots = context.GetAllBot();
             Console.WriteLine("Доступны боты:");
@@ -159,9 +136,9 @@ namespace ChatWithBot.Model
         }
         public override bool Equals(object obj)
         {
-            return (obj==null) || (obj.GetType() != typeof(User))
-            ? false 
-            : Name==((User)obj).Name;
+            return (obj == null) || (obj.GetType() != typeof(User))
+            ? false
+            : Name == ((User)obj).Name;
         }
 
         public override int GetHashCode()
