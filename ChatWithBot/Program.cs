@@ -12,13 +12,12 @@ namespace ChatWithBot
             Console.WriteLine("Добро пожаловать");
             IContext context = new BinaryHelper();
             ChatApp chatApp = new ChatApp(context);
-           // var AllChat = context.GetAllChats();
 
             Console.WriteLine("Ваше имя:");
             string UserName = Console.ReadLine().Trim();
             User user=chatApp.GetUser(UserName);
            
-            Console.WriteLine(" Cписок доступных команд\n create-chat\n start-chat \n");
+            Console.WriteLine("Cписок доступных команд\n create-chat\n start-chat \n");
             bool showMenu = true;
             while (showMenu)
             {
@@ -107,9 +106,6 @@ namespace ChatWithBot
                 switch (CommandParts[0])
                 {
                     case "sign":
-                        /*
-                         Можно перенсти в Chatapp весь метод 
-                         */
                         string NameInvite = CommandParts[1].Replace("@", "");
                         try
                         {
@@ -126,9 +122,6 @@ namespace ChatWithBot
                         }
                         break;
                     case "logut":
-                        /*
-                        Можно перенсти в Chatapp весь метод , убрать выводы в консоль
-                        */
                         NameInvite = CommandParts[1].Replace("@", "");
                         try
                         {
@@ -143,7 +136,6 @@ namespace ChatWithBot
                         {
                             Console.WriteLine(e.Message);
                         }
-                        chat.AddLogChat(chat, CommandParts[0], user);////Как по умному залогировать ???
                         break;
                     case "add-mes":
                         string NameSend = CommandParts[1].Replace("@", "");
@@ -153,7 +145,7 @@ namespace ChatWithBot
                         {
                             var message = chatApp.SendMessege(chat, user, Content, NameSend);
                             Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
-                            // chat.AddLogChat(chat, CommandParts[0], user);
+                            chat.AddLogChat(chat, CommandParts[0], user);
                         }
                         catch (ArgumentNullException e)
                         {
@@ -170,8 +162,6 @@ namespace ChatWithBot
                             int IndexMessege = Convert.ToInt32(CommandParts[1]) - 1;
                             chatApp.DeleteMessge(chat, IndexMessege, user);
                             Console.WriteLine("Сообщение успешно удаленно ");
-                            // chat.AddLogChat(chat, CommandParts[0], user);
-
                         }
                         catch (FormatException)
                         {
@@ -185,7 +175,6 @@ namespace ChatWithBot
                         catch (ArgumentException e)
                         {
                             Console.WriteLine(e.Message);
-
                         }
                         break;
                     case "bot":
@@ -214,9 +203,6 @@ namespace ChatWithBot
                         }
                         break;
                     case "signb":
-                        /*
-                         Убираем весь вывод в консоли
-                         */
                         var ListBots = chatApp.Bots;
                         Console.WriteLine("Доступны боты:");
                         int i = 1;
