@@ -1,13 +1,15 @@
 ﻿using ChatWithBot.Interface;
 using ChatWithBot.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ChatWithBot
 {
     class Program
     {
-        static void Main(string[] args)
+        static  void  Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать");
             IContext context = new BinaryHelper();
@@ -30,10 +32,7 @@ namespace ChatWithBot
                         Chat Newchat = new Chat(user, NameChat);
                         chatApp.CreateChat(Newchat);
                         Console.WriteLine("Чат успешно создан");
-                        /*Пока под вопросом
-                        Newchat.AddLogChat(Newchat, choice, user);
-                        */
-                        DialogChat(user, Newchat, chatApp);
+                         DialogChat(user, Newchat, chatApp);
                         break;
                     case "start-chat":
                         if (chatApp.ListChats.Count == 0)
@@ -59,8 +58,7 @@ namespace ChatWithBot
                         {
                             int chociChat = Convert.ToInt32(Console.ReadLine().Trim()) - 1;
                             Chat chat = chatApp.ListChats[chociChat];
-                            //chat.AddLogChat(chat, choice, user);
-                            DialogChat(user, chat, chatApp);
+                             DialogChat(user, chat, chatApp);
                             showMenu = false;
                         }
                         catch (FormatException)
@@ -78,7 +76,7 @@ namespace ChatWithBot
                 }
             }
         }
-        static void DialogChat(User user, Chat chat,  ChatApp chatApp)
+        static  void DialogChat(User user, Chat chat,  ChatApp chatApp)
         {
             Console.WriteLine("Список участников данного чата : ");
             foreach (var u in chat.Users)
@@ -181,9 +179,17 @@ namespace ChatWithBot
                         try
                         {
                             string botName = CommandParts[1].Replace("@", "");
-                            string commadBot = CommandParts[^1];
-                            var message=chatApp.BotMove(chat, user, botName, commadBot);
-                            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
+                            string commandBot = CommandParts[^1];
+                            BotMoves(chatApp,chat,user,botName, commandBot);
+                           
+                            ////await MoveBots();
+                            //// var message = await chatApp.BotMoveAsync(chat, user, botName, commadBot);
+                            ////var message = await Task.Run(()=> chatApp.BotMove(chat, user, botName, commadBot));
+                            //Task task = Task.Run(()=> chatApp.BotMove(chat, user, botName, commadBot));
+                            Console.WriteLine($"Тук Тут");
+
+                            //var message =chatApp.BotMove(chat, user, botName, commadBot);
+                            //Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
                         }
                         catch (FormatException)
                         {
@@ -249,6 +255,28 @@ namespace ChatWithBot
                 }
             }
         }
+        private static async void BotMoves(ChatApp chatApp, Chat chat, User user, string botName, string commandBot)
+        {
+            var TaskMessage = Task.Run(()=> chatApp.BotMove(chat, user, botName, commandBot));
+            await TaskMessage;
+            Message message = TaskMessage.Result;
+            Console.WriteLine($"id={message.IdMessage + 1} {message.User.Name} {message.dateTime} ({message.OutUser}): {message.Content}");
+        }
+        private static async void BotMoves()
+        {
+            List<Task> listTask = new List<Task>(); 
+            listTask.Add( Task.Run(() => testMethod(1)) );
+            listTask.Add( Task.Run(() => testMethod(2)) );
+            listTask.Add( Task.Run(() => testMethod(3)) );
+           /// Task<int> winningTag = await Task.WaitAny(listTask);
+        }
+        private static int testMethod(int number)
+        {
+            return 2 * number;
+
+        }
+
+
     }
 
 }

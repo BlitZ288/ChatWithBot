@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChatWithBot
@@ -128,6 +129,8 @@ namespace ChatWithBot
         }
         public Message BotMove(Chat chat, User user, string botName,string command)
         {
+            Console.WriteLine("Начало обраобки");
+            Thread.Sleep(10000);
             if (chat.Users.Contains(user))
             {
                 if (chat.ChatBot.Where(b => b.NameBot == botName).Any())
@@ -142,9 +145,11 @@ namespace ChatWithBot
                     }
                     if (!String.IsNullOrEmpty(Contetn))
                     {
-                        var message = new Message(Contetn, botName, chat, user); ///Есть вывод в консоль на условие
+                        var message = new Message(Contetn, botName, chat, user); 
                         chat.ListMessage.Add(message);
                         Context.CreatChat(ListChats);
+                        Console.WriteLine("Конец обраобки");
+
                         return message;
                     }
                     else
@@ -162,6 +167,50 @@ namespace ChatWithBot
                 throw new Exception("Вы не являись участником \n Чтобы присоединиться используйте команду sign @usernames");
             }
         }
+        public  Task<Message> BotMoveAsync(Chat chat, User user, string botName, string command)
+        {
+            Console.WriteLine("Начало обраобки");
+            Thread.Sleep(5000);
+            return Task.Run(() =>
+            {
+                if (chat.Users.Contains(user))
+                {
+                    if (chat.ChatBot.Where(b => b.NameBot == botName).Any())
+                    {
+                        string Contetn = "";
+                        foreach (var b in chat.ChatBot)
+                        {
+                            if (b.NameBot == botName)
+                            {
+                                Contetn = b.Move(command);
+                            }
+                        }
+                        if (!String.IsNullOrEmpty(Contetn))
+                        {
+                            var message = new Message(Contetn, botName, chat, user);
+                            chat.ListMessage.Add(message);
+                            Context.CreatChat(ListChats);
+                            Console.WriteLine("Конец обраобки");
+                            return message;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Некорректная команда");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Такого бота в чатe нет ((");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Вы не являись участником \n Чтобы присоединиться используйте команду sign @usernames");
+                }
+            });
+           
+        }
+
         public IBot InviteBot(int indexBot,Chat chat, User user)
         {
             if (chat.Users.Contains(user))
